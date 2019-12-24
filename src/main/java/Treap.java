@@ -466,14 +466,14 @@ public class Treap<T extends Comparable<T>> implements SortedSet<T> {
             return size(treap);
         }
 
-        private int size(Treap<T> node) {
+        private int size(Treap<T> treap) {
             int count = 0;
-            if (node == null)
+            if (treap == null)
                 return count;
-            count += size(node.leftTreap);
-            if (onInterval(node.value))
+            count += size(treap.leftTreap);
+            if (onInterval(treap.value))
                 count++;
-            count += size(node.rightTreap);
+            count += size(treap.rightTreap);
             return count;
         }
 
