@@ -25,9 +25,42 @@ public class Treap<T extends Comparable<T>> implements SortedSet<T> {
         this.rightTreap = rightTreap;
     }
 
+    T getValue() {
+        return this.value;
+    }
+
+    Integer getPrior() {
+        return this.prior;
+    }
+
+    Treap<T> getLeftTreap() {
+        return this.leftTreap;
+    }
+
+    Treap<T> getRightTreap() {
+        return this.rightTreap;
+    }
+
     @Override
     public int size() {
         return size;
+    }
+
+    /** Горизонтальный обход дерева**/
+    private List<Treap<T>> breadthFirstBypass(Treap<T> start) {
+        List<Treap<T>> list = new ArrayList<>();
+        LinkedList<Treap<T>> queue = new LinkedList<>();
+        do {
+            list.add(start);
+            if (start.leftTreap != null) queue.add(start.leftTreap);
+            if (start.rightTreap != null) queue.add(start.rightTreap);
+            if (!queue.isEmpty()) start = queue.poll();
+        } while (!queue.isEmpty());
+        return list;
+    }
+
+    public List<Treap<T>> breadthFirstBypass() {
+        return breadthFirstBypass(this);
     }
 
     @Override
@@ -59,7 +92,11 @@ public class Treap<T extends Comparable<T>> implements SortedSet<T> {
         return Math.max(height(start.leftTreap), height(start.rightTreap)) + 1;
     }
 
-    private Treap<T> find(T value) {
+    int height() {
+        return height(this);
+    }
+
+    Treap<T> find(T value) {
         if (this.value == null)
             return null;
         return find(this, value);
@@ -111,20 +148,20 @@ public class Treap<T extends Comparable<T>> implements SortedSet<T> {
 
     public class TreapIterator implements Iterator<T> {
 
-        private Stack<Treap<T>> stack = new Stack<>();
+        private Deque<Treap<T>> deque = new ArrayDeque<>();  //deque
         private Treap<T> current = null;
 
         private TreapIterator() {
             Treap<T> treap = Treap.this;
             while (treap != null && treap.value != null) {
-                stack.push(treap);
+                deque.push(treap);
                 treap = treap.leftTreap;
             }
         }
 
         @Override
         public boolean hasNext() {
-            return !stack.isEmpty();
+            return !deque.isEmpty();
         }
 
         @Override
@@ -135,12 +172,12 @@ public class Treap<T extends Comparable<T>> implements SortedSet<T> {
         }
 
         private Treap<T> nextTreap() {
-            Treap<T> treap = stack.pop();
+            Treap<T> treap = deque.pop();
             current = treap;
             if (treap.rightTreap != null && treap.rightTreap.value != null) {
                 treap = treap.rightTreap;
                 while (treap != null && treap.value != null) {
-                    stack.push(treap);
+                    deque.push(treap);
                     treap = treap.leftTreap;
                 }
             }
@@ -247,7 +284,7 @@ public class Treap<T extends Comparable<T>> implements SortedSet<T> {
     boolean add(T value, Integer prior) {
         if (value == null || contains(value))
             return false;
-        if (isEmpty()) {
+        if (isEmpty() || this.value == null) {
             this.value = value;
             this.prior = prior;
             this.leftTreap = new Treap<>();
